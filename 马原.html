@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 数字人格档案馆 - 数据收集</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .header .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+        input, select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+        input:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        .app-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .app-row input, .app-row select {
+            height: 46px;
+            min-width: 0; /* 重要：防止flex项溢出 */
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .btn-add {
+            background: #4CAF50;
+            margin-top: 10px;
+        }
+        .btn-remove {
+            background: #f44336;
+            padding: 0;
+            width: 46px;
+            height: 46px;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            display: none;
+        }
+        .personality-tag {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 8px 5px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tag-social { background: #FF6B6B; color: white; }
+        .tag-creator { background: #4ECDC4; color: white; }
+        .tag-hidden { background: #45B7D1; color: white; }
+        .tag-night { background: #96CEB4; color: white; }
+        .tag-fragment { background: #FFEAA7; color: #333; }
+        .tag-default { background: #A8A8A8; color: white; }
+        .slogan {
+            font-style: italic;
+            color: #666;
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+            font-size: 17px;
+        }
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .time-grid div {
+            display: flex;
+            flex-direction: column;
+        }
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .checkbox-grid label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .checkbox-grid label:hover {
+            background: #e9ecef;
+        }
+        .checkbox-grid input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .app-name { flex: 3; min-width: 120px; }
+        .app-time { flex: 2; min-width: 100px; }
+        .app-category { flex: 2; min-width: 110px; }
+
+        @media (max-width: 768px) {
+            .app-row {
+                flex-wrap: wrap;
+            }
+            .app-row > * {
+                flex: 1 1 100%;
+                margin-bottom: 10px;
+            }
+            .app-row .btn-remove {
+                flex: 0 0 auto;
+                width: 100%;
+            }
+            .time-grid {
+                grid-template-columns: 1fr;
+            }
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 数字人格档案馆</h1>
+            <div class="subtitle">记录你的数字足迹，解锁历史角色</div>
+        </div>
+
+        <form id="dataForm" onsubmit="return false;">
+            <!-- 基本信息 -->
+            <div class="form-group">
+                <label for="username">你的称呼</label>
+                <input type="text" id="username" placeholder="输入昵称或姓名" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date">记录日期</label>
+                <input type="date" id="date" required>
+            </div>
+
+            <!-- App使用记录（已修复） -->
+            <div class="form-group">
+                <label>📱 App 使用记录</label>
+                <div id="appContainer">
+                    <div class="app-row">
+                        <input type="text" class="app-name" placeholder="App名称 (如: 微信)" required>
+                        <input type="number" class="app-time" placeholder="使用时长 (分钟)" min="0" required>
+                        <select class="app-category">
+                            <option value="社交">社交通讯</option>
+                            <option value="创作">内容创作</option>
+                            <option value="工具">系统工具</option>
+                            <option value="娱乐">影音娱乐</option>
+                            <option value="学习">学习工作</option>
+                        </select>
+                        <button type="button" class="btn btn-remove" onclick="removeAppRow(this)">×</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-add" onclick="addAppRow()">+ 添加更多App</button>
+            </div>
+
+            <!-- 使用时间段分布 -->
+            <div class="form-group">
+                <label>🕐 使用时间段分布 (分钟)</label>
+                <div class="time-grid">
+                    <div>
+                        <label for="morning">早晨 (6-12点)</label>
+                        <input type="number" id="morning" placeholder="分钟" min="0" value="0">
+                    </div>
+                    <div>
+                        <label for="afternoon">下午 (12-18点)</label>
+                        <input type="number" id="afternoon" placeholder="分钟" min="0" value="0">
+                    </div>
+                    <div>
+                        <label for="evening">晚上 (18-24点)</label>
+                        <input type="number" id="evening" placeholder="分钟" min="0" value="0">
+                    </div>
+                    <div>
+                        <label for="night">深夜 (0-6点)</label>
+                        <input type="number" id="night" placeholder="分钟" min="0" value="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用模式 -->
+            <div class="form-group">
+                <label>🎭 使用模式</label>
+                <div class="checkbox-grid">
+                    <label>
+                        <input type="checkbox" id="shortSessions" value="true">
+                        短时间多次使用 (单次≤2分钟)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="nightUsage" value="true">
+                        经常深夜使用 (0-5点)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="createContent" value="true">
+                        经常创作内容
+                    </label>
+                    <label>
+                        <input type="checkbox" id="minimalSocial" value="true">
+                        很少使用社交App
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" class="btn" onclick="analyzeData()" style="width: 100%; padding: 15px; font-size: 18px;">
+                🎭 生成数字人格报告
+            </button>
+        </form>
+
+        <!-- 结果展示区域 -->
+        <div id="result" class="result">
+            <h3>🎯 你的数字人格分析报告</h3>
+            <div id="personalityTags" style="margin: 20px 0;"></div>
+            <div id="slogan" class="slogan"></div>
+
+            <h4>📊 详细数据统计</h4>
+            <div id="detailedData" style="margin: 15px 0;"></div>
+
+            <div id="timeChart" style="margin: 20px 0; padding: 15px; background: white; border-radius: 8px;">
+                <h5>⏰ 时间段分布</h5>
+                <div id="chartContainer"></div>
+            </div>
+
+            <div style="margin-top: 25px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" onclick="saveAsImage()" style="flex: 1; min-width: 150px;">
+                    📸 保存为图片
+                </button>
+                <button class="btn" onclick="exportData()" style="flex: 1; min-width: 150px;">
+                    📥 导出数据
+                </button>
+                <button class="btn" onclick="resetForm()" style="flex: 1; min-width: 150px;">
+                    🔄 重新填写
+                </button>
+                <button class="btn" onclick="shareResult()" style="flex: 1; min-width: 150px;">
+                    📤 分享结果
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 设置默认日期为今天
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            // 初始添加一个App行
+            addAppRow();
+        });
+
+        // 添加App行
+        function addAppRow() {
+            const container = document.getElementById('appContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'app-row';
+            newRow.innerHTML = `
+                <input type="text" class="app-name" placeholder="App名称" required>
+                <input type="number" class="app-time" placeholder="使用时长" min="0" required>
+                <select class="app-category">
+                    <option value="社交">社交通讯</option>
+                    <option value="创作">内容创作</option>
+                    <option value="工具">系统工具</option>
+                    <option value="娱乐">影音娱乐</option>
+                    <option value="学习">学习工作</option>
+                </select>
+                <button type="button" class="btn btn-remove" onclick="removeAppRow(this)">×</button>
+            `;
+            container.appendChild(newRow);
+
+            // 自动聚焦到新添加的App名称输入框
+            newRow.querySelector('.app-name').focus();
+        }
+
+        // 移除App行
+        function removeAppRow(button) {
+            const rows = document.querySelectorAll('.app-row');
+            if(rows.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('至少需要保留一个App记录');
+            }
+        }
+
+        // 核心分析函数
+        function analyzeData() {
+            // 验证必要数据
+            const username = document.getElementById('username').value;
+            if(!username.trim()) {
+                alert('请输入你的称呼');
+                document.getElementById('username').focus();
+                return;
+            }
+
+            // 收集数据
+            const date = document.getElementById('date').value;
+
+            // 收集App数据
+            const appRows = document.querySelectorAll('.app-row');
+            let totalTime = 0;
+            let socialTime = 0;
+            let createTime = 0;
+            let toolTime = 0;
+            let entertainmentTime = 0;
+            let learnTime = 0;
+            const apps = [];
+            let isValid = true;
+
+            appRows.forEach((row, index) => {
+                const name = row.querySelector('.app-name').value.trim();
+                const time = parseInt(row.querySelector('.app-time').value) || 0;
+                const category = row.querySelector('.app-category').value;
+
+                // 验证App名称
+                if(!name) {
+                    alert(`第${index + 1}个App名称不能为空`);
+                    row.querySelector('.app-name').focus();
+                    isValid = false;
+                    return;
+                }
+
+                // 验证时长
+                if(time <= 0) {
+                    alert(`"${name}"的时长必须大于0分钟`);
+                    row.querySelector('.app-time').focus();
+                    isValid = false;
+                    return;
+                }
+
+                totalTime += time;
+
+                // 分类统计
+                switch(category) {
+                    case '社交': socialTime += time; break;
+                    case '创作': createTime += time; break;
+                    case '工具': toolTime += time; break;
+                    case '娱乐': entertainmentTime += time; break;
+                    case '学习': learnTime += time; break;
+                }
+
+                apps.push({name, time, category});
+            });
+
+            if(!isValid) return;
+
+            if(totalTime === 0) {
+                alert('请至少输入一个App的使用时长');
+                return;
+            }
+
+            // 收集时段数据
+            const morningTime = parseInt(document.getElementById('morning').value) || 0;
+            const afternoonTime = parseInt(document.getElementById('afternoon').value) || 0;
+            const eveningTime = parseInt(document.getElementById('evening').value) || 0;
+            const nightTime = parseInt(document.getElementById('night').value) || 0;
+
+            // 计算时段总和用于验证
+            const totalPeriodTime = morningTime + afternoonTime + eveningTime + nightTime;
+            if(totalPeriodTime > totalTime * 1.5) {
+                if(!confirm('时间段总和可能超过总使用时间，是否继续？')) return;
+            }
+
+            // 收集使用模式
+            const hasShortSessions = document.getElementById('shortSessions').checked;
+            const hasNightUsage = document.getElementById('nightUsage').checked;
+            const hasCreateContent = document.getElementById('createContent').checked;
+            const hasMinimalSocial = document.getElementById('minimalSocial').checked;
+
+            // 计算比率
+            const socialRatio = totalTime > 0 ? socialTime / totalTime : 0;
+            const toolRatio = totalTime > 0 ? toolTime / totalTime : 0;
+            const nightRatio = totalTime > 0 ? nightTime / totalTime : 0;
+            const createRatio = totalTime > 0 ? createTime / totalTime : 0;
+
+            // 判断人格标签
+            const tags = [];
+
+            // 1. 社媒重度依赖型人格 (社交≥150min且占比≥60%)
+            if(socialTime >= 150 && socialRatio >= 0.6) {
+                tags.push({
+                    name: "社媒重度依赖型",
+                    class: "tag-social",
+                    slogan: "人民刷屏的每一秒，都在雕刻集体记忆。",
+                    description: "你的数字生活在社交网络中深深扎根"
+                });
+            }
+
+            // 2. 内容耕作者 (创作≥90min或经常创作)
+            if(createTime >= 90 || hasCreateContent) {
+                tags.push({
+                    name: "内容耕作者",
+                    class: "tag-creator",
+                    slogan: "群众生产内容，就像在历史田野里插秧。",
+                    description: "你是数字世界的创作者和播种者"
+                });
+            }
+
+            // 3. 数字隐者 (社交<10%且工具>50%)
+            if(socialRatio < 0.1 && toolRatio > 0.5) {
+                tags.push({
+                    name: "数字隐者",
+                    class: "tag-hidden",
+                    slogan: "沉默也是历史的一部分。",
+                    description: "在数字世界中保持专注与内省"
+                });
+            }
+
+            // 4. 夜行史官 (深夜占比≥30%或经常深夜使用)
+            if(nightRatio >= 0.3 || hasNightUsage) {
+                tags.push({
+                    name: "夜行史官",
+                    class: "tag-night",
+                    slogan: "深夜的每一次点亮，都是群众在加班写史。",
+                    description: "在寂静的夜晚记录数字轨迹"
+                });
+            }
+
+            // 5. 碎片拼贴师 (短时间多次使用)
+            if(hasShortSessions) {
+                tags.push({
+                    name: "碎片拼贴师",
+                    class: "tag-fragment",
+                    slogan: "再短的一次点击，也是历史拼图的一块。",
+                    description: "擅长在碎片时间中编织数字生活"
+                });
+            }
+
+            // 额外标签：学习达人
+            if(learnTime >= 120) {
+                tags.push({
+                    name: "数字学者",
+                    class: "tag-default",
+                    slogan: "每一次学习，都是对未来的投资。",
+                    description: "在数字世界中持续成长"
+                });
+            }
+
+            // 如果没有标签，添加默认
+            if(tags.length === 0) {
+                tags.push({
+                    name: "数字平衡者",
+                    class: "tag-default",
+                    slogan: "你的数字足迹正在形成独特的历史轨迹。",
+                    description: "在数字生活中保持健康平衡"
+                });
+            }
+
+            // 显示结果
+            displayResults(username, date, totalTime, tags, apps, {
+                socialTime, createTime, toolTime, entertainmentTime, learnTime,
+                morningTime, afternoonTime, eveningTime, nightTime
+            });
+        }
+
+        function displayResults(username, date, totalTime, tags, apps, stats) {
+            const resultDiv = document.getElementById('result');
+            const tagsDiv = document.getElementById('personalityTags');
+            const sloganDiv = document.getElementById('slogan');
+            const detailDiv = document.getElementById('detailedData');
+            const chartDiv = document.getElementById('chartContainer');
+
+            // 显示标签
+            tagsDiv.innerHTML = '<strong>🏷️ 获得的人格标签：</strong><br><br>';
+            tags.forEach(tag => {
+                tagsDiv.innerHTML += `
+                    <span class="personality-tag ${tag.class}" title="${tag.description}">
+                        ${tag.name}
+                    </span>
+                `;
+            });
+
+            // 显示随机口号
+            const randomTag = tags[Math.floor(Math.random() * tags.length)];
+            sloganDiv.innerHTML = `💭 <strong>专属寄语：</strong>"${randomTag.slogan}"`;
+
+            // 计算各类别占比
+            const socialPercent = totalTime > 0 ? (stats.socialTime / totalTime * 100).toFixed(1) : 0;
+            const createPercent = totalTime > 0 ? (stats.createTime / totalTime * 100).toFixed(1) : 0;
+            const toolPercent = totalTime > 0 ? (stats.toolTime / totalTime * 100).toFixed(1) : 0;
+            const entertainmentPercent = totalTime > 0 ? (stats.entertainmentTime / totalTime * 100).toFixed(1) : 0;
+            const learnPercent = totalTime > 0 ? (stats.learnTime / totalTime * 100).toFixed(1) : 0;
+
+            // 显示详细数据
+            detailDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <strong>👤 用户</strong><br>${username}
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <strong>📅 日期</strong><br>${date}
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <strong>⏱️ 总时长</strong><br>${totalTime} 分钟
+                    </div>
+                </div>
+
+                <h5>📊 使用类别分布</h5>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0;">
+                    <div style="background: #FF6B6B20; padding: 10px; border-radius: 6px; border-left: 4px solid #FF6B6B;">
+                        <strong>社交通讯</strong><br>${stats.socialTime}分钟 (${socialPercent}%)
+                    </div>
+                    <div style="background: #4ECDC420; padding: 10px; border-radius: 6px; border-left: 4px solid #4ECDC4;">
+                        <strong>内容创作</strong><br>${stats.createTime}分钟 (${createPercent}%)
+                    </div>
+                    <div style="background: #45B7D120; padding: 10px; border-radius: 6px; border-left: 4px solid #45B7D1;">
+                        <strong>系统工具</strong><br>${stats.toolTime}分钟 (${toolPercent}%)
+                    </div>
+                    <div style="background: #FFEAA720; padding: 10px; border-radius: 6px; border-left: 4px solid #FFEAA7;">
+                        <strong>影音娱乐</strong><br>${stats.entertainmentTime}分钟 (${entertainmentPercent}%)
+                    </div>
+                    <div style="background: #A8A8A820; padding: 10px; border-radius: 6px; border-left: 4px solid #A8A8A8;">
+                        <strong>学习工作</strong><br>${stats.learnTime}分钟 (${learnPercent}%)
+                    </div>
+                </div>
+
+                <h5>📱 App使用详情</h5>
+                <div style="max-height: 200px; overflow-y: auto; margin: 10px 0; padding: 10px; background: white; border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">App名称</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">类别</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">时长(分钟)</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">占比</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${apps.map(app => {
+                                const percent = totalTime > 0 ? ((app.time / totalTime) * 100).toFixed(1) : 0;
+                                return `
+                                    <tr>
+                                        <td style="padding: 10px; border-bottom: 1px solid #eee;">${app.name}</td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #eee;">${app.category}</td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #eee;">${app.time}</td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #eee;">${percent}%</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // 生成简单的时间段图表
+            chartDiv.innerHTML = `
+                <div style="display: flex; align-items: flex-end; height: 150px; gap: 20px; margin-top: 10px;">
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: #96CEB4; width: 80%; height: ${(stats.morningTime / (totalTime || 1)) * 100}px; border-radius: 4px 4px 0 0;"></div>
+                        <div style="margin-top: 5px; font-size: 12px;">早晨<br>${stats.morningTime}分</div>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: #FFEAA7; width: 80%; height: ${(stats.afternoonTime / (totalTime || 1)) * 100}px; border-radius: 4px 4px 0 0;"></div>
+                        <div style="margin-top: 5px; font-size: 12px;">下午<br>${stats.afternoonTime}分</div>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: #FF6B6B; width: 80%; height: ${(stats.eveningTime / (totalTime || 1)) * 100}px; border-radius: 4px 4px 0 0;"></div>
+                        <div style="margin-top: 5px; font-size: 12px;">晚上<br>${stats.eveningTime}分</div>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <div style="background: #764ba2; width: 80%; height: ${(stats.nightTime / (totalTime || 1)) * 100}px; border-radius: 4px 4px 0 0;"></div>
+                        <div style="margin-top: 5px; font-size: 12px;">深夜<br>${stats.nightTime}分</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 10px; color: #666; font-size: 14px;">
+                    各时段使用时长对比
+                </div>
+            `;
+
+            // 显示结果区域
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({behavior: 'smooth'});
+        }
+
+        // 保存为图片
+        function saveAsImage() {
+            alert('提示：要使用截图功能，请在HTML头部添加以下代码：\n\n' +
+                  '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>\n\n' +
+                  '然后取消注释saveAsImage函数中的代码');
+
+            /* 启用截图功能的代码：
+            html2canvas(document.getElementById('result')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `数字人格报告_${document.getElementById('username').value}_${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+            */
+        }
+
+        // 导出数据
+        function exportData() {
+            const username = document.getElementById('username').value || '匿名用户';
+            const data = {
+                用户: username,
+                记录日期: document.getElementById('date').value,
+                分析时间: new Date().toLocaleString('zh-CN'),
+                人格标签: Array.from(document.querySelectorAll('.personality-tag')).map(tag => tag.textContent),
+                详细报告: document.getElementById('result').innerText
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `数字人格档案_${username}_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert(`数据已导出为JSON文件：${a.download}`);
+        }
+
+        // 分享结果
+        function shareResult() {
+            const tags = Array.from(document.querySelectorAll('.personality-tag'))
+                .map(tag => tag.textContent)
+                .join('、');
+
+            const text = `📱 我的数字人格分析：${tags}\n` +
+                        `💭 ${document.getElementById('slogan').textContent}\n` +
+                        `📊 查看详细报告：`;
+
+            if(navigator.share) {
+                navigator.share({
+                    title: '我的数字人格报告',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                prompt('复制以下内容分享给朋友：', text);
+            }
+        }
+
+        // 重置表单
+        function resetForm() {
+            if(confirm('确定要重置所有数据吗？')) {
+                document.getElementById('dataForm').reset();
+                document.getElementById('result').style.display = 'none';
+
+                // 重置日期为今天
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('date').value = today;
+
+                // 只保留一个App行并清空
+                const container = document.getElementById('appContainer');
+                while(container.children.length > 1) {
+                    container.removeChild(container.lastChild);
+                }
+
+                // 清空第一个App行
+                const firstRow = container.firstElementChild;
+                firstRow.querySelector('.app-name').value = '';
+                firstRow.querySelector('.app-time').value = '';
+                firstRow.querySelector('.app-category').selectedIndex = 0;
+
+                // 重置时间段
+                ['morning', 'afternoon', 'evening', 'night'].forEach(id => {
+                    document.getElementById(id).value = '0';
+                });
+
+                // 聚焦到用户名输入框
+                document.getElementById('username').focus();
+            }
+        }
+
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Enter 提交表单
+            if(e.ctrlKey && e.key === 'Enter') {
+                analyzeData();
+            }
+            // Esc 重置表单
+            if(e.key === 'Escape') {
+                resetForm();
+            }
+        });
+    </script>
+</body>
+</html>
